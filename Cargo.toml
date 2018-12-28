@@ -1,6 +1,12 @@
 [package]
 name = "actix-diesel"
+description = "Integrate Diesel into Actix (and Actix Web) cleanly and efficiently."
+repository = "https://github.com/mehcode/actix-diesel"
+license = "MIT/Apache-2.0"
 version = "0.0.0"
+keywords = ["web", "actix", "async", "diesel", "database"]
+categories = ["asynchronous", "web-programming::http-server", "database"]
+readme = "README.md"
 authors = ["Ryan Leckey <leckey.ryan@gmail.com>"]
 edition = "2018"
 
