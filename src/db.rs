@@ -38,7 +38,7 @@ where
     C: Connection,
 {
     #[inline]
-    pub fn open(&mut self, url: impl Into<String>) -> Database<C> {
+    pub fn open(url: impl Into<String>) -> Database<C> {
         Self::builder().open(url)
     }
 
