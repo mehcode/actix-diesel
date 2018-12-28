@@ -49,6 +49,8 @@ where
             pool_max_size: None,
             pool_min_idle: None,
             pool_max_lifetime: None,
+            on_acquire: None,
+            on_release: None,
         }
     }
 
