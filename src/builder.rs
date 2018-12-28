@@ -39,10 +39,7 @@ where
         self
     }
 
-    pub fn open(&mut self, url: impl Into<String>) -> Database<C>
-    where
-        C: Connection,
-    {
+    pub fn open(&mut self, url: impl Into<String>) -> Database<C> {
         let manager = ConnectionManager::<C>::new(url);
         let mut p = Pool::builder();
 
