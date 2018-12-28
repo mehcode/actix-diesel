@@ -1,10 +1,13 @@
 use actix::MailboxError;
-use derive_more::{Display, From};
+use derive_more::Display;
 use std::{error::Error as StdError, fmt::Debug};
 
-#[derive(Debug, Display, From)]
-pub enum Error {
-    // Occured during message deliver to sync actor
+#[derive(Debug, Display)]
+pub enum Error<E>
+where
+    E: 'static + Debug + Send + Sync,
+{
+    // Occured during message delivery to sync actor
     #[display(fmt = "{}", _0)]
     Delivery(MailboxError),
 
@@ -14,10 +17,10 @@ pub enum Error {
 
     // Occured during execute
     #[display(fmt = "{:?}", _0)]
-    Execute(Box<dyn Debug + Send + Sync>),
+    Execute(E),
 }
 
-impl StdError for Error {}
+impl<E> StdError for Error<E> where E: 'static + Debug + Send + Sync {}
 
 #[cfg(feature = "actix-web")]
-impl actix_web::ResponseError for Error {}
+impl<E> actix_web::ResponseError for Error<E> where E: 'static + Debug + Send + Sync {}

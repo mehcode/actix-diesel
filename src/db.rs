@@ -54,7 +54,7 @@ where
 
     /// Executes the given function inside a database transaction.
     #[inline]
-    pub fn transaction<F, R, E>(&self, f: F) -> impl Future<Item = R, Error = Error>
+    pub fn transaction<F, R, E>(&self, f: F) -> impl Future<Item = R, Error = Error<E>>
     where
         F: 'static + FnOnce(&C) -> Result<R, E> + Send,
         R: 'static + Send,
@@ -66,7 +66,7 @@ where
     /// Executes the given function with a connection retrieved from the pool.
     ///
     /// This is non-blocking and uses a `SyncArbiter` to provide a thread pool.
-    pub fn get<F, R, E>(&self, f: F) -> impl Future<Item = R, Error = Error>
+    pub fn get<F, R, E>(&self, f: F) -> impl Future<Item = R, Error = Error<E>>
     where
         F: 'static + FnOnce(&C) -> Result<R, E> + Send,
         R: 'static + Send,
@@ -75,18 +75,18 @@ where
         self.cell
             .get_or_init(|| (self.init)(self.pool.clone()))
             .send(Execute(f, PhantomData))
-            .then(|res| -> Result<R, Error> {
+            .then(|res| -> Result<R, Error<E>> {
                 match res {
                     Ok(res) => match res {
                         Ok(res) => match res {
                             Ok(value) => Ok(value),
-                            Err(err) => Err(Error::Execute(Box::new(err))),
+                            Err(err) => Err(Error::Execute(err)),
                         },
 
-                        Err(err) => Err(err.into()),
+                        Err(err) => Err(Error::Checkout(err)),
                     },
 
-                    Err(err) => Err(err.into()),
+                    Err(err) => Err(Error::Delivery(err)),
                 }
             })
     }
