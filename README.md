@@ -1,9 +1,22 @@
 # Actix Diesel
 > Integrate Diesel into Actix (and Actix Web) cleanly and efficiently.
 
+This crate allows for a simple async interface to `diesel` powered by `actix`. It's main goal is to provide
+`actix-web` users an elegant interface to `diesel` however it can be used without the web portions.
+
+If you're familiar with how Anko SQLite works in Android the interface was modeled off of that.
+
 ## Usage
 
-See [the example](./example) for usage information for now.
+See [the example](./example) for detailed usage information.
+
+```rust
+async fn index(state: State<AppState>) -> Result<Json<User>> {
+    // `Database::get` takes a closure that accepts an isolated connection
+    // `Database::transaction` also exists as shorthand for immediately entering a transaction
+    Ok(await!(state.db.get(|conn| users::table.load(&conn)))?)
+}
+```
 
 ## License
 
