@@ -5,9 +5,6 @@
 > This build uses a [frozen version](../rust-toolchain) of the `nightly` toolchain.
 
 ```
-# This uses a frozen version of a nightly toolchain.
-cat ../rust-toolchain
-
 cargo build
 cargo install diesel_cli --no-default-features --features sqlite
 diesel migration run
