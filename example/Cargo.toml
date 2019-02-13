@@ -13,3 +13,4 @@ failure = "0.1.5"
 actix-web-async-await = "0.2.0"
 serde = { version = "1.0.85", features = [ "derive" ] }
 dotenv = "0.13.0"
+futures = "0.1"

@@ -5,8 +5,7 @@
 extern crate diesel;
 
 use actix_diesel::Database;
-use actix_web::http::Method;
-use actix_web::{middleware, server, App};
+use actix_web::{http::Method, middleware, server, App};
 use actix_web_async_await::{compat, compat2};
 use diesel::sqlite::SqliteConnection;
 use failure::Error;
@@ -37,7 +36,8 @@ fn main() -> Result<(), Error> {
     server::new(move || {
         App::with_state(AppState { db: db.clone() })
             .middleware(middleware::Logger::default())
-            .route("/", Method::GET, compat(fetch))
+            .route("/", Method::GET, compat(fetch_all))
+            .route("/{name}", Method::GET, compat2(fetch_one))
             .route("/{name}", Method::POST, compat2(create))
     })
     .bind("127.0.0.1:8080")?

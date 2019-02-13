@@ -1,7 +1,12 @@
 use crate::{schema::users, AppState};
-use actix_web::{HttpResponse, Json, Path, Responder, Result, State};
+use actix_diesel::{dsl::AsyncRunQueryDsl, AsyncError};
+use actix_web::{
+    error::{ErrorInternalServerError, ErrorNotFound},
+    HttpResponse, Json, Path, Responder, Result, State,
+};
 use actix_web_async_await::await;
-use diesel::prelude::*;
+use diesel::{prelude::*, result::Error};
+use futures::future::Future;
 use serde::Serialize;
 
 #[derive(Serialize, Queryable)]
@@ -10,10 +15,22 @@ struct User {
     name: String,
 }
 
-pub async fn fetch(state: State<AppState>) -> Result<impl Responder> {
-    let results = await!(state.db.get(|conn| users::table.load::<User>(conn)))?;
+pub async fn fetch_all(state: State<AppState>) -> Result<impl Responder> {
+    let results = await!(users::table.load_async::<User>(&state.db))?;
 
     Ok(Json(results))
+}
+
+pub async fn fetch_one(state: State<AppState>, name: Path<String>) -> Result<impl Responder> {
+    let result = await!(users::table
+        .filter(users::name.eq(name.into_inner()))
+        .get_result_async::<User>(&state.db)
+        .map_err(|err| match err {
+            AsyncError::Query(Error::NotFound) => ErrorNotFound(err),
+            _ => ErrorInternalServerError(err),
+        }))?;
+
+    Ok(Json(result))
 }
 
 #[derive(Insertable)]
@@ -23,11 +40,11 @@ struct CreateUser {
 }
 
 pub async fn create(state: State<AppState>, name: Path<String>) -> Result<impl Responder> {
-    await!(state.db.get(move |conn| diesel::insert_into(users::table)
+    await!(diesel::insert_into(users::table)
         .values(CreateUser {
             name: name.into_inner()
         })
-        .execute(conn)))?;
+        .execute_async(&state.db))?;
 
     Ok(HttpResponse::Created())
 }
