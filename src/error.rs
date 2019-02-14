@@ -30,7 +30,7 @@ impl Error<failure::Error> {
     #[inline]
     pub fn downcast<T: failure::Fail>(self) -> Result<T, Self> {
         match self {
-            Error::Execute(err) => err.downcast().map_err(Error::Execute),
+            AsyncError::Execute(err) => err.downcast().map_err(AsyncError::Execute),
             err => Err(err),
         }
     }
@@ -39,7 +39,7 @@ impl Error<failure::Error> {
     #[inline]
     pub fn downcast_ref<T: failure::Fail>(&self) -> Option<&T> {
         match self {
-            Error::Execute(err) => err.downcast_ref(),
+            AsyncError::Execute(err) => err.downcast_ref(),
             _ => None,
         }
     }
@@ -48,7 +48,7 @@ impl Error<failure::Error> {
     #[inline]
     pub fn downcast_mut<T: failure::Fail>(&mut self) -> Option<&mut T> {
         match self {
-            Error::Execute(err) => err.downcast_mut(),
+            AsyncError::Execute(err) => err.downcast_mut(),
             _ => None,
         }
     }
