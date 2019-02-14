@@ -2,7 +2,7 @@ use crate::{AsyncError, Database};
 use diesel::{
     dsl::Limit,
     query_dsl::{limit_dsl::LimitDsl, load_dsl::ExecuteDsl, LoadQuery},
-    result::OptionalExtension,
+    result::{Error, OptionalExtension},
     Connection, RunQueryDsl,
 };
 use futures::Future;
@@ -11,7 +11,10 @@ pub trait AsyncRunQueryDsl<Conn>: RunQueryDsl<Conn>
 where
     Conn: Connection,
 {
-    fn execute_async(self, db: &Database<Conn>) -> Box<Future<Item = usize, Error = AsyncError>>
+    fn execute_async(
+        self,
+        db: &Database<Conn>,
+    ) -> Box<Future<Item = usize, Error = AsyncError<Error>>>
     where
         Conn: Connection,
         Self: ExecuteDsl<Conn>;
@@ -19,7 +22,7 @@ where
     fn load_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = Vec<U>, Error = AsyncError>>
+    ) -> Box<Future<Item = Vec<U>, Error = AsyncError<Error>>>
     where
         U: Send,
         Self: LoadQuery<Conn, U>;
@@ -27,7 +30,7 @@ where
     fn get_result_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = U, Error = AsyncError>>
+    ) -> Box<Future<Item = U, Error = AsyncError<Error>>>
     where
         U: Send,
         Self: LoadQuery<Conn, U>;
@@ -35,7 +38,7 @@ where
     fn get_optional_result_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = Option<U>, Error = AsyncError>>
+    ) -> Box<Future<Item = Option<U>, Error = AsyncError<Error>>>
     where
         U: Send,
         Self: LoadQuery<Conn, U>;
@@ -43,7 +46,7 @@ where
     fn get_results_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = Vec<U>, Error = AsyncError>>
+    ) -> Box<Future<Item = Vec<U>, Error = AsyncError<Error>>>
     where
         U: Send,
         Self: LoadQuery<Conn, U>;
@@ -51,7 +54,7 @@ where
     fn first_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = U, Error = AsyncError>>
+    ) -> Box<Future<Item = U, Error = AsyncError<Error>>>
     where
         U: Send,
         Self: LimitDsl,
@@ -64,7 +67,10 @@ where
     Conn: Connection,
 {
     #[inline]
-    fn execute_async(self, db: &Database<Conn>) -> Box<Future<Item = usize, Error = AsyncError>>
+    fn execute_async(
+        self,
+        db: &Database<Conn>,
+    ) -> Box<Future<Item = usize, Error = AsyncError<Error>>>
     where
         Conn: Connection,
         Self: ExecuteDsl<Conn>,
@@ -76,7 +82,7 @@ where
     fn load_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = Vec<U>, Error = AsyncError>>
+    ) -> Box<Future<Item = Vec<U>, Error = AsyncError<Error>>>
     where
         U: Send,
         Self: LoadQuery<Conn, U>,
@@ -88,7 +94,7 @@ where
     fn get_results_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = Vec<U>, Error = AsyncError>>
+    ) -> Box<Future<Item = Vec<U>, Error = AsyncError<Error>>>
     where
         U: Send,
         Self: LoadQuery<Conn, U>,
@@ -100,7 +106,7 @@ where
     fn get_result_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = U, Error = AsyncError>>
+    ) -> Box<Future<Item = U, Error = AsyncError<Error>>>
     where
         U: Send,
         Self: LoadQuery<Conn, U>,
@@ -112,7 +118,7 @@ where
     fn get_optional_result_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = Option<U>, Error = AsyncError>>
+    ) -> Box<Future<Item = Option<U>, Error = AsyncError<Error>>>
     where
         U: Send,
         Self: LoadQuery<Conn, U>,
@@ -124,7 +130,7 @@ where
     fn first_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = U, Error = AsyncError>>
+    ) -> Box<Future<Item = U, Error = AsyncError<Error>>>
     where
         U: Send,
         Self: LimitDsl,

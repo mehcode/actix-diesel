@@ -26,7 +26,7 @@ pub async fn fetch_one(state: State<AppState>, name: Path<String>) -> Result<imp
         .filter(users::name.eq(name.into_inner()))
         .get_result_async::<User>(&state.db)
         .map_err(|err| match err {
-            AsyncError::Query(Error::NotFound) => ErrorNotFound(err),
+            AsyncError::Execute(Error::NotFound) => ErrorNotFound(err),
             _ => ErrorInternalServerError(err),
         }))?;
 

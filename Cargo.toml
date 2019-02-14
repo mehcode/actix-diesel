@@ -19,3 +19,4 @@ futures = "0.1.25"
 derive_more = "0.13.0"
 r2d2 = "0.8.3"
 actix-web = { version = "0.7.18", optional = true }
+failure = { version = "0.1.5", optional = true }

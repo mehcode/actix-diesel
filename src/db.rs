@@ -9,7 +9,7 @@ use diesel::{
 };
 use futures::Future;
 use once_cell::sync::OnceCell;
-use std::{marker::PhantomData, sync::Arc};
+use std::{fmt::Debug, marker::PhantomData, sync::Arc};
 
 pub struct Database<C: 'static>
 where
@@ -56,10 +56,11 @@ where
 
     /// Executes the given function inside a database transaction.
     #[inline]
-    pub fn transaction<F, R>(&self, f: F) -> impl Future<Item = R, Error = AsyncError>
+    pub fn transaction<F, R, E>(&self, f: F) -> impl Future<Item = R, Error = AsyncError<E>>
     where
-        F: 'static + FnOnce(&C) -> Result<R, diesel::result::Error> + Send,
+        F: 'static + FnOnce(&C) -> Result<R, E> + Send,
         R: 'static + Send,
+        E: 'static + From<diesel::result::Error> + Debug + Send + Sync,
     {
         self.get(move |conn| conn.transaction(move || f(conn)))
     }
@@ -67,20 +68,21 @@ where
     /// Executes the given function with a connection retrieved from the pool.
     ///
     /// This is non-blocking and uses a `SyncArbiter` to provide a thread pool.
-    pub fn get<F, R>(&self, f: F) -> impl Future<Item = R, Error = AsyncError>
+    pub fn get<F, R, E>(&self, f: F) -> impl Future<Item = R, Error = AsyncError<E>>
     where
-        F: 'static + FnOnce(&C) -> Result<R, diesel::result::Error> + Send,
+        F: 'static + FnOnce(&C) -> Result<R, E> + Send,
         R: 'static + Send,
+        E: 'static + Debug + Send + Sync,
     {
         self.cell
             .get_or_init(|| (self.init)(self.pool.clone()))
             .send(Execute(f, PhantomData))
-            .then(|res| -> Result<R, AsyncError> {
+            .then(|res| -> Result<R, AsyncError<E>> {
                 match res {
                     Ok(res) => match res {
                         Ok(res) => match res {
                             Ok(value) => Ok(value),
-                            Err(err) => Err(AsyncError::Query(err)),
+                            Err(err) => Err(AsyncError::Execute(err)),
                         },
 
                         Err(err) => Err(AsyncError::Timeout(err)),
