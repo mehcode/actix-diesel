@@ -25,7 +25,7 @@ impl<E> StdError for AsyncError<E> where E: 'static + Debug + Send + Sync {}
 impl<E> actix_web::ResponseError for AsyncError<E> where E: 'static + Debug + Send + Sync {}
 
 #[cfg(feature = "failure")]
-impl Error<failure::Error> {
+impl AsyncError<failure::Error> {
     /// Attempts to downcast this Error to a particular Fail type.
     #[inline]
     pub fn downcast<T: failure::Fail>(self) -> Result<T, Self> {
