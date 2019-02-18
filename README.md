@@ -12,9 +12,7 @@ See [the example](./example) for detailed usage information.
 
 ```rust
 async fn index(state: State<AppState>) -> Result<Json<User>> {
-    // `Database::get` takes a closure that accepts an isolated connection
-    // `Database::transaction` also exists as shorthand for immediately entering a transaction
-    Ok(await!(state.db.get(|conn| users::table.load(&conn)))?)
+    Ok(await!(users::table.load_async(&state.db))?)
 }
 ```
 
