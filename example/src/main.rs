@@ -1,14 +1,11 @@
-#![feature(async_await, await_macro, futures_api)]
-#![allow(proc_macro_derive_resolution_fallback)]
-
 #[macro_use]
 extern crate diesel;
 
 use actix_diesel::Database;
-use actix_web::{http::Method, middleware, server, App};
-use actix_web_async_await::{compat, compat2};
+use actix_web::{middleware, web, App, HttpServer};
 use diesel::sqlite::SqliteConnection;
 use failure::Error;
+use futures::future::{FutureExt, TryFutureExt};
 use std::time::Duration;
 
 mod routes;
@@ -33,15 +30,23 @@ fn main() -> Result<(), Error> {
         .pool_max_lifetime(Some(Duration::from_secs(30 * 60)))
         .open("file:example.sqlite");
 
-    server::new(move || {
-        App::with_state(AppState { db: db.clone() })
-            .middleware(middleware::Logger::default())
-            .route("/", Method::GET, compat(fetch_all))
-            .route("/{name}", Method::GET, compat2(fetch_one))
-            .route("/{name}", Method::POST, compat2(create))
+    HttpServer::new(move || {
+        App::new()
+            .data(AppState { db: db.clone() })
+            .wrap(middleware::Logger::default())
+            .route("/", web::get().to_async(|x| fetch_all(x).boxed().compat()))
+            .route(
+                "/{name}",
+                web::get().to_async(|x, y| fetch_one(x, y).boxed().compat()),
+            )
+            .route(
+                "/{name}",
+                web::post().to_async(|x, y| create(x, y).boxed().compat()),
+            )
     })
     .bind("127.0.0.1:8080")?
-    .run();
+    .run()
+    .unwrap();
 
     Ok(())
 }

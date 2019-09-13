@@ -27,7 +27,7 @@ where
     fn clone(&self) -> Self {
         Database {
             cell: self.cell.clone(),
-            init: self.init.clone(),
+            init: self.init,
             pool: self.pool.clone(),
         }
     }

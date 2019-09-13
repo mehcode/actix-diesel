@@ -12,16 +12,21 @@ use std::{
     time::Duration,
 };
 
+pub type OnAcquire<C> = Box<dyn Fn(&mut C) -> Result<(), R2D2Error> + Send + Sync>;
+pub type OnRelease<C> = Box<dyn Fn(C) + Send + Sync>;
+
 pub struct Builder<C: 'static>
 where
     C: Connection,
 {
     pub(crate) phantom: PhantomData<C>,
     pub(crate) pool_max_size: Option<u32>,
+    #[allow(clippy::option_option)]
     pub(crate) pool_min_idle: Option<Option<u32>>,
+    #[allow(clippy::option_option)]
     pub(crate) pool_max_lifetime: Option<Option<Duration>>,
-    pub(crate) on_acquire: Option<Box<Fn(&mut C) -> Result<(), R2D2Error> + Send + Sync>>,
-    pub(crate) on_release: Option<Box<Fn(C) + Send + Sync>>,
+    pub(crate) on_acquire: Option<OnAcquire<C>>,
+    pub(crate) on_release: Option<OnRelease<C>>,
 }
 
 impl<C> Builder<C>
@@ -95,8 +100,8 @@ where
 }
 
 struct FnConnectionCustomizer<C: 'static> {
-    on_acquire: Option<Box<Fn(&mut C) -> Result<(), R2D2Error> + Send + Sync>>,
-    on_release: Option<Box<Fn(C) + Send + Sync>>,
+    on_acquire: Option<OnAcquire<C>>,
+    on_release: Option<OnRelease<C>>,
 }
 
 impl<C> Debug for FnConnectionCustomizer<C> {

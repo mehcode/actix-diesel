@@ -14,7 +14,7 @@ where
     fn execute_async(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = usize, Error = AsyncError<Error>>>
+    ) -> Box<dyn Future<Item = usize, Error = AsyncError<Error>> + Send>
     where
         Conn: Connection,
         Self: ExecuteDsl<Conn>;
@@ -22,7 +22,7 @@ where
     fn load_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = Vec<U>, Error = AsyncError<Error>>>
+    ) -> Box<dyn Future<Item = Vec<U>, Error = AsyncError<Error>> + Send>
     where
         U: Send,
         Self: LoadQuery<Conn, U>;
@@ -30,7 +30,7 @@ where
     fn get_result_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = U, Error = AsyncError<Error>>>
+    ) -> Box<dyn Future<Item = U, Error = AsyncError<Error>> + Send>
     where
         U: Send,
         Self: LoadQuery<Conn, U>;
@@ -38,7 +38,7 @@ where
     fn get_optional_result_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = Option<U>, Error = AsyncError<Error>>>
+    ) -> Box<dyn Future<Item = Option<U>, Error = AsyncError<Error>> + Send>
     where
         U: Send,
         Self: LoadQuery<Conn, U>;
@@ -46,7 +46,7 @@ where
     fn get_results_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = Vec<U>, Error = AsyncError<Error>>>
+    ) -> Box<dyn Future<Item = Vec<U>, Error = AsyncError<Error>> + Send>
     where
         U: Send,
         Self: LoadQuery<Conn, U>;
@@ -54,7 +54,7 @@ where
     fn first_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = U, Error = AsyncError<Error>>>
+    ) -> Box<dyn Future<Item = U, Error = AsyncError<Error>> + Send>
     where
         U: Send,
         Self: LimitDsl,
@@ -70,7 +70,7 @@ where
     fn execute_async(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = usize, Error = AsyncError<Error>>>
+    ) -> Box<dyn Future<Item = usize, Error = AsyncError<Error>> + Send>
     where
         Conn: Connection,
         Self: ExecuteDsl<Conn>,
@@ -82,7 +82,7 @@ where
     fn load_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = Vec<U>, Error = AsyncError<Error>>>
+    ) -> Box<dyn Future<Item = Vec<U>, Error = AsyncError<Error>> + Send>
     where
         U: Send,
         Self: LoadQuery<Conn, U>,
@@ -94,7 +94,7 @@ where
     fn get_results_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = Vec<U>, Error = AsyncError<Error>>>
+    ) -> Box<dyn Future<Item = Vec<U>, Error = AsyncError<Error>> + Send>
     where
         U: Send,
         Self: LoadQuery<Conn, U>,
@@ -106,7 +106,7 @@ where
     fn get_result_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = U, Error = AsyncError<Error>>>
+    ) -> Box<dyn Future<Item = U, Error = AsyncError<Error>> + Send>
     where
         U: Send,
         Self: LoadQuery<Conn, U>,
@@ -118,7 +118,7 @@ where
     fn get_optional_result_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = Option<U>, Error = AsyncError<Error>>>
+    ) -> Box<dyn Future<Item = Option<U>, Error = AsyncError<Error>> + Send>
     where
         U: Send,
         Self: LoadQuery<Conn, U>,
@@ -130,7 +130,7 @@ where
     fn first_async<U: 'static>(
         self,
         db: &Database<Conn>,
-    ) -> Box<Future<Item = U, Error = AsyncError<Error>>>
+    ) -> Box<dyn Future<Item = U, Error = AsyncError<Error>> + Send>
     where
         U: Send,
         Self: LimitDsl,
