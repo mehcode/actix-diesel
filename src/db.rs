@@ -60,7 +60,7 @@ where
     where
         F: 'static + FnOnce(&C) -> Result<R, E> + Send,
         R: 'static + Send,
-        E: 'static + From<diesel::result::Error> + Debug + Send + Sync,
+        E: 'static + From<diesel::result::Error> + Debug + Send,
     {
         self.get(move |conn| conn.transaction(move || f(conn)))
     }
@@ -72,7 +72,7 @@ where
     where
         F: 'static + FnOnce(&C) -> Result<R, E> + Send,
         R: 'static + Send,
-        E: 'static + Debug + Send + Sync,
+        E: 'static + Debug + Send,
     {
         self.cell
             .get_or_init(|| (self.init)(self.pool.clone()))
