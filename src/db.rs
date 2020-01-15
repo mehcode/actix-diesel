@@ -7,7 +7,7 @@ use diesel::{
     r2d2::{ConnectionManager, Pool},
     Connection,
 };
-use futures::Future;
+use futures::{Future, future::FutureExt};
 use once_cell::sync::OnceCell;
 use std::{fmt::Debug, marker::PhantomData, sync::Arc};
 
@@ -56,7 +56,7 @@ where
 
     /// Executes the given function inside a database transaction.
     #[inline]
-    pub fn transaction<F, R, E>(&self, f: F) -> impl Future<Item = R, Error = AsyncError<E>>
+    pub fn transaction<F, R, E>(&self, f: F) -> impl Future<Output = Result<R, AsyncError<E>>>
     where
         F: 'static + FnOnce(&C) -> Result<R, E> + Send,
         R: 'static + Send,
@@ -68,7 +68,7 @@ where
     /// Executes the given function with a connection retrieved from the pool.
     ///
     /// This is non-blocking and uses a `SyncArbiter` to provide a thread pool.
-    pub fn get<F, R, E>(&self, f: F) -> impl Future<Item = R, Error = AsyncError<E>>
+    pub fn get<F, R, E>(&self, f: F) -> impl Future<Output = Result<R, AsyncError<E>>>
     where
         F: 'static + FnOnce(&C) -> Result<R, E> + Send,
         R: 'static + Send,
@@ -77,7 +77,7 @@ where
         self.cell
             .get_or_init(|| (self.init)(self.pool.clone()))
             .send(Execute(f, PhantomData))
-            .then(|res| -> Result<R, AsyncError<E>> {
+            .map(|res| -> Result<R, AsyncError<E>> {
                 match res {
                     Ok(res) => match res {
                         Ok(res) => match res {
