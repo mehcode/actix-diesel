@@ -4,7 +4,7 @@ use std::{error::Error as StdError, fmt::Debug};
 #[derive(Debug, Display)]
 pub enum AsyncError<E>
 where
-    E: 'static + Debug + Send + Sync,
+    E: 'static + Debug + Send,
 {
     // Error occured when attempting to deliver the query to the Database actor
     #[display(fmt = "{}", _0)]
@@ -19,10 +19,10 @@ where
     Execute(E),
 }
 
-impl<E> StdError for AsyncError<E> where E: 'static + Debug + Send + Sync {}
+impl<E> StdError for AsyncError<E> where E: 'static + Debug + Send {}
 
 #[cfg(feature = "actix-web")]
-impl<E> actix_web::ResponseError for AsyncError<E> where E: 'static + Debug + Send + Sync {}
+impl<E> actix_web::ResponseError for AsyncError<E> where E: 'static + Debug + Send {}
 
 #[cfg(feature = "failure")]
 impl AsyncError<failure::Error> {

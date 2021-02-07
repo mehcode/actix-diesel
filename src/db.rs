@@ -7,7 +7,7 @@ use diesel::{
     r2d2::{ConnectionManager, Pool},
     Connection,
 };
-use futures::Future;
+use futures::future::FutureExt;
 use once_cell::sync::OnceCell;
 use std::{fmt::Debug, marker::PhantomData, sync::Arc};
 
@@ -27,7 +27,7 @@ where
     fn clone(&self) -> Self {
         Database {
             cell: self.cell.clone(),
-            init: self.init.clone(),
+            init: self.init,
             pool: self.pool.clone(),
         }
     }
@@ -56,28 +56,29 @@ where
 
     /// Executes the given function inside a database transaction.
     #[inline]
-    pub fn transaction<F, R, E>(&self, f: F) -> impl Future<Item = R, Error = AsyncError<E>>
+    pub async fn transaction<F, R, E>(&self, f: F) -> Result<R, AsyncError<E>>
     where
         F: 'static + FnOnce(&C) -> Result<R, E> + Send,
         R: 'static + Send,
-        E: 'static + From<diesel::result::Error> + Debug + Send + Sync,
+        E: 'static + From<diesel::result::Error> + Debug + Send,
     {
         self.get(move |conn| conn.transaction(move || f(conn)))
+            .await
     }
 
     /// Executes the given function with a connection retrieved from the pool.
     ///
     /// This is non-blocking and uses a `SyncArbiter` to provide a thread pool.
-    pub fn get<F, R, E>(&self, f: F) -> impl Future<Item = R, Error = AsyncError<E>>
+    pub async fn get<F, R, E>(&self, f: F) -> Result<R, AsyncError<E>>
     where
         F: 'static + FnOnce(&C) -> Result<R, E> + Send,
         R: 'static + Send,
-        E: 'static + Debug + Send + Sync,
+        E: 'static + Debug + Send,
     {
         self.cell
             .get_or_init(|| (self.init)(self.pool.clone()))
             .send(Execute(f, PhantomData))
-            .then(|res| -> Result<R, AsyncError<E>> {
+            .map(|res| -> Result<R, AsyncError<E>> {
                 match res {
                     Ok(res) => match res {
                         Ok(res) => match res {
@@ -91,5 +92,6 @@ where
                     Err(err) => Err(AsyncError::Delivery(err)),
                 }
             })
+            .await
     }
 }
