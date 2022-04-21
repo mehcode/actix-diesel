@@ -20,14 +20,14 @@ where
 pub(crate) struct Execute<F, C, R, E>(pub(crate) F, pub(crate) PhantomData<(C, R)>)
 where
     R: 'static + Send,
-    E: 'static + Debug + Send + Sync,
+    E: 'static + Debug + Send,
     C: Connection,
     F: FnOnce(&C) -> Result<R, E>;
 
 impl<F, C, R, E> Message for Execute<F, C, R, E>
 where
     R: Send,
-    E: Debug + Send + Sync,
+    E: Debug + Send,
     C: Connection,
     F: FnOnce(&C) -> Result<R, E>,
 {
@@ -37,7 +37,7 @@ where
 impl<F, C, R, E> Handler<Execute<F, C, R, E>> for Executor<C>
 where
     R: Send,
-    E: Debug + Send + Sync,
+    E: Debug + Send,
     C: Connection,
     F: FnOnce(&C) -> Result<R, E>,
 {

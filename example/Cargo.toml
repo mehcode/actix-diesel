@@ -5,12 +5,11 @@ authors = ["Ryan Leckey <leckey.ryan@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-diesel = { version = "1.4.1", features = [ "sqlite" ] }
-actix-web = "0.7.18"
+diesel = { version = "1.4.2", features = [ "sqlite" ] }
+actix-web = "1.0.7"
 actix-diesel = { path = "..", features = [ "actix-web" ] }
-pretty_env_logger = "0.3.0"
+pretty_env_logger = "0.3.1"
 failure = "0.1.5"
-actix-web-async-await = "0.2.0"
-serde = { version = "1.0.85", features = [ "derive" ] }
-dotenv = "0.13.0"
-futures = "0.1"
+serde = { version = "1.0.100", features = [ "derive" ] }
+dotenv = "0.14.1"
+futures-preview = { version = "0.3.0-alpha.18", features = [ "compat" ] }
